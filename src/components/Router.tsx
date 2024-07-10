@@ -5,7 +5,6 @@ import PostsDetail from "pages/posts/detail";
 import PostNew from "pages/posts/new";
 import PorfilePage from "pages/profile";
 import SignupPage from "pages/signup";
-import { useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 interface RouterProps {
@@ -27,8 +26,8 @@ export default function Router({ isAuthenticated }: RouterProps) {
         </>
       ) : (
         <>
-          <Route path="/loginPage" element={<LoginPage />} />
-          <Route path="/signupPage" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="*" element={<LoginPage />} />
         </>
       )}
