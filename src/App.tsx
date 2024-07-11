@@ -1,10 +1,10 @@
-import Router from "./components/Router";
-import { app } from "firebaseApp";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Loader from "components/Loader";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app, db } from "firebaseApp";
+import { useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Router from "./components/Router";
 
 function App() {
   const auth = getAuth(app);
@@ -14,6 +14,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
     !!auth?.currentUser
   );
+  console.log(db);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -25,6 +26,7 @@ function App() {
       setInit(true);
     });
   }, [auth]);
+
   return (
     <>
       <ToastContainer />
