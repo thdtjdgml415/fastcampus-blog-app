@@ -1,29 +1,46 @@
 import AuthContext from "context/AuthContext";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "firebaseApp";
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { PostProps } from "./PostList";
 
 export default function PostForm() {
+  const params = useParams();
+  const [post, setPost] = useState<PostProps | null>();
   const [title, setTitle] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const { user } = useContext(AuthContext);
   const navigation = useNavigate();
-  console.log(title, summary, content);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      await addDoc(collection(db, "posts"), {
-        title: title,
-        summary: summary,
-        content: content,
-        createAt: new Date()?.toLocaleDateString(),
-        email: user?.email,
-      });
+      if (post && post.id) {
+        // 만약 post 데이터가 있다면 firestore 수정
+        const postRef = doc(db, "posts", post?.id);
+        await updateDoc(postRef, {
+          title: title,
+          summary: summary,
+          content: content,
+          updatedAt: new Date()?.toLocaleDateString(),
+        });
+        toast.success("게시글 수정에 성공하셨습니다.");
+        navigation(`/posts/${post.id}`);
+      } else {
+        // 만약에 데이터가 없다면 firestore로 데이터 생성
+        await addDoc(collection(db, "posts"), {
+          title: title,
+          summary: summary,
+          content: content,
+          createAt: new Date()?.toLocaleDateString(),
+          email: user?.email,
+          uid: user?.uid,
+        });
+      }
 
       toast.success("게시글을 성공적으로 작성하셨습니다.");
       navigation("/");
@@ -50,6 +67,31 @@ export default function PostForm() {
       setContent(value);
     }
   };
+
+  const getPost = async (id: string) => {
+    if (id) {
+      const docRef = doc(db, "posts", id);
+      const docSnap = await getDoc(docRef);
+
+      const postData = { ...docSnap.data(), id: docSnap.id };
+      setPost(postData as PostProps);
+    }
+  };
+  console.log(post);
+
+  useEffect(() => {
+    if (params?.id) {
+      getPost(params.id);
+    }
+  }, [params]);
+
+  useEffect(() => {
+    if (post) {
+      setTitle(post?.title);
+      setSummary(post?.summary);
+      setContent(post?.content);
+    }
+  }, [post]);
 
   return (
     <form onSubmit={onSubmit} className="form">
@@ -86,7 +128,11 @@ export default function PostForm() {
         />
       </div>
       <div className="form__block">
-        <input type="submit" value="제출" className="form__btn-submit" />
+        <input
+          type="submit"
+          value={post ? "수정" : "제출"}
+          className="form__btn-submit"
+        />
       </div>
     </form>
   );

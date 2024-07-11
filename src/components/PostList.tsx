@@ -8,13 +8,15 @@ interface PostListProps {
 }
 type TabType = "all" | "my";
 
-interface PostProps {
+export interface PostProps {
   id: string;
   title: string;
   email: string;
   summary: string;
   content: string;
   createdAt: string;
+  uid: string;
+  updatedAt: string;
 }
 
 export default function PostList({ hasNavigation = true }: PostListProps) {
@@ -72,7 +74,7 @@ export default function PostList({ hasNavigation = true }: PostListProps) {
                 </div>
 
                 <div className="post__title">{post.title}</div>
-                <div className="post__text">{post.content}</div>
+                <div className="post__text">{post.summary}</div>
               </Link>
               {post.email === user?.email ? (
                 <div className="post__utils-box">
