@@ -12,11 +12,6 @@ import { db } from "firebaseApp";
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-interface PostListProps {
-  hasNavigation?: boolean;
-  defaultTap?: TabType;
-}
-type TabType = "all" | "my";
 
 export interface PostProps {
   id: string;
@@ -27,13 +22,30 @@ export interface PostProps {
   createdAt: string;
   uid: string;
   updatedAt: string;
+  category: CategoryType;
 }
+
+interface PostListProps {
+  hasNavigation?: boolean;
+  defaultTap?: TabType | CategoryType;
+}
+type TabType = "all" | "my";
+
+export type CategoryType = "Frontend" | "Backend" | "Web" | "Native";
+export const CATEGORYS: CategoryType[] = [
+  "Frontend",
+  "Backend",
+  "Web",
+  "Native",
+];
 
 export default function PostList({
   hasNavigation = true,
   defaultTap = "all",
 }: PostListProps) {
-  const [activeTab, setActiveTab] = useState<TabType>(defaultTap);
+  const [activeTab, setActiveTab] = useState<TabType | CategoryType>(
+    defaultTap
+  );
   const [posts, setPosts] = useState<PostProps[]>([]);
   const { user } = useContext(AuthContext);
 
@@ -48,9 +60,16 @@ export default function PostList({
         where("uid", "==", user?.uid),
         orderBy("createdAt", "asc")
       );
-    } else {
+    } else if (activeTab === "all" && user) {
       // 모든 글 보여주기
       postsQuery = query(postsRef, orderBy("createdAt", "asc"));
+    } else {
+      // 카테고리 글 보여주기
+      postsQuery = query(
+        postsRef,
+        where("category", "==", activeTab),
+        orderBy("createdAt", "asc")
+      );
     }
 
     const datas = await getDocs(postsQuery);
@@ -96,6 +115,20 @@ export default function PostList({
           >
             나의 글
           </div>
+          {CATEGORYS.map((category) => {
+            return (
+              <div
+                key={category}
+                role="presentation"
+                onClick={() => setActiveTab(category)}
+                className={
+                  activeTab === `${category}` ? "post__navigation--active" : ""
+                }
+              >
+                {category}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -122,7 +155,9 @@ export default function PostList({
           ))}
         </div>
       ) : (
-        <div className="post__no-post">게시글이 존재하지 않습니다.</div>
+        <div className="post__list">
+          <div className="post__no-post">게시글이 존재하지 않습니다.</div>
+        </div>
       )}
     </>
   );
