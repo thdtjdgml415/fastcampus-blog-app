@@ -8,7 +8,7 @@ export default function PorfilePage() {
     <>
       <Header />
       <Profile />
-      <PostList hasNavigation={false} />
+      <PostList hasNavigation={false} defaultTap="my" />
       <Footer />
     </>
   );
