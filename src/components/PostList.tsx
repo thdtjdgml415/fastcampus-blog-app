@@ -23,6 +23,14 @@ export interface PostProps {
   uid: string;
   updatedAt: string;
   category: CategoryType;
+  comments: Comment[];
+}
+
+export interface Comment {
+  content: string;
+  createdAt: string;
+  email: string;
+  uid: string;
 }
 
 interface PostListProps {
